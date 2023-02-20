@@ -7,6 +7,9 @@ import shared.Utils;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionListener;
+
+import base.Main;
+
 import java.awt.*;
 import java.util.List;
 import java.awt.event.ActionListener;
@@ -16,13 +19,9 @@ public class MainWindow extends JFrame {
 
     private static final long serialVersionUID = 1L;
     private Design windowDesign;
-    private JPanel pnlNorth;
-    private JPanel pnlEast;
-    private JPanel pnlSouth;
-    private JPanel pnlWest;
-    private JPanel pnlCenter;
+    private JPanel pnlNorth, pnlEast, pnlSouth, pnlWest, pnlCenter, pnlRobotCommands;
     private JList<RemoteRobot> robotList;
-    private DefaultListModel<RemoteRobot> listModel = new DefaultListModel();
+    private DefaultListModel<RemoteRobot> listModel = new DefaultListModel<>();
     private JScrollPane spRobotList, spConsoleView;
     private JButton btnAddRobot;
     private JButton btnRemoveRobot;
@@ -32,8 +31,8 @@ public class MainWindow extends JFrame {
     private JTextField tfCommands;
     private JCheckBox cbEnableControls;
 
-    public MainWindow(Design windowDesign) {
-        this.windowDesign = windowDesign;
+    public MainWindow() {
+        this.windowDesign = Main.windowDesign;
         this.windowInit();
         this.build();
     }
@@ -51,20 +50,12 @@ public class MainWindow extends JFrame {
     }
 
     public void changeConsole(RemoteRobot robot) {
-        if(robot == null) {
-            System.out.println("Robot is null");
-            return;
-        }
+        if(robot == null) return;
         pnlCenter.remove(spConsoleView);
+        pnlCenter.remove(pnlRobotCommands);
         consoleView = robot.getConsole();
-        consoleView.setFont(windowDesign.getTextFont());
-        consoleView.setBackground(windowDesign.getComponentColor());
-        consoleView.setForeground(windowDesign.getTextColor());
-        spConsoleView = new JScrollPane(consoleView);
-        spConsoleView.setBackground(windowDesign.getComponentColor());
-        spConsoleView.setPreferredSize(new Dimension(600, 500));
-        spConsoleView.setBorder(windowDesign.getBorder());
-        pnlCenter.add(spConsoleView);
+        spConsoleView = Utils.createConsoleContainer(consoleView);
+        updateRobotView();
         pnlCenter.validate();
         pnlCenter.repaint();
     }
@@ -122,10 +113,8 @@ public class MainWindow extends JFrame {
     }
 
     private void buildRobotList() {
-        List<RemoteRobot> robotTest = Arrays.asList(new RemoteRobot("Robot 1"), new RemoteRobot("Robot 2"), new RemoteRobot("Robot 3"), new RemoteRobot("Robot 4"), new RemoteRobot("Robot 5"), new RemoteRobot("Robot 6"), new RemoteRobot("Robot 7"), new RemoteRobot("Robot 8"));
-        listModel = new DefaultListModel();
-        listModel.addAll(robotTest);
-        robotList = new JList(this.listModel);
+        listModel = new DefaultListModel<RemoteRobot>();
+        robotList = new JList<RemoteRobot>(this.listModel);
         robotList.setBackground(windowDesign.getComponentColor());
         robotList.setForeground(windowDesign.getTextColor());
         robotList.setFocusable(false);
@@ -151,34 +140,25 @@ public class MainWindow extends JFrame {
         btnRemoveRobot.setFocusable(false);
         btnRemoveRobot.setFont(windowDesign.getHeaderFont());
         btnRemoveRobot.setBorder(windowDesign.getBorder());
-
+        
+        pnlWest.setBackground(windowDesign.getBackgroundColor());
+        pnlWest.setPreferredSize(new Dimension(250, 300));
         pnlWest.add(this.spRobotList);
         pnlWest.add(this.btnAddRobot);
         pnlWest.add(this.btnRemoveRobot);
-        pnlWest.setBackground(windowDesign.getBackgroundColor());
-        pnlWest.setPreferredSize(new Dimension(250, 300));
     }
 
     private void buildRobotView() {
-        clientConsole = Utils.createNewConsole();
-        clientConsole.append("Hello \n");
-        clientConsole.append("Hello1\n");
-        clientConsole.append("Hello2\n");
-        clientConsole.append("Hello3\n");
-        clientConsole.append("Hello4\n");
-        clientConsole.append("Hello5\n");
+        clientConsole = clientConsole == null ? Utils.createNewConsole() : clientConsole;
         consoleView = consoleView == null ? clientConsole : consoleView;
-        consoleView.setFont(windowDesign.getTextFont());
-        consoleView.setBackground(windowDesign.getComponentColor());
-        consoleView.setForeground(windowDesign.getTextColor());
         spConsoleView = new JScrollPane(consoleView);
         spConsoleView.setPreferredSize(new Dimension(600, 500));
         spConsoleView.setBackground(windowDesign.getComponentColor());
         spConsoleView.setBorder(windowDesign.getBorder());
-
-        JPanel panel = new JPanel();
-        panel.setPreferredSize(new Dimension(2000, 50));
-        panel.setBackground(windowDesign.getBackgroundColor());
+        
+        pnlRobotCommands = new JPanel();
+        pnlRobotCommands.setPreferredSize(new Dimension(2000, 50));
+        pnlRobotCommands.setBackground(windowDesign.getBackgroundColor());
 
         tfCommands = new JTextField();
         tfCommands.setPreferredSize(new Dimension(500, 30));
@@ -202,12 +182,17 @@ public class MainWindow extends JFrame {
         cbEnableControls.setFont(windowDesign.getHeaderFont());
         cbEnableControls.setForeground(windowDesign.getHeaderColor());
 
-        panel.add(tfCommands);
-        panel.add(btnSendCommand);
-        panel.add(cbEnableControls);
+        //pnlRobotCommands.add(tfCommands);
+        //pnlRobotCommands.add(btnSendCommand);
+        pnlRobotCommands.add(cbEnableControls);
 
         pnlCenter.add(spConsoleView);
-        pnlCenter.add(panel);
+        pnlCenter.add(pnlRobotCommands);
+    }
+    
+    private void updateRobotView() {
+    	 pnlCenter.add(spConsoleView);
+         pnlCenter.add(pnlRobotCommands);
     }
 
 }

@@ -25,7 +25,7 @@ public class AddRemoveRobotController {
         @Override
         public void actionPerformed(ActionEvent e) {
             String robotName = JOptionPane.showInputDialog(view, "Bitte Robotername eingeben", "Robotername");
-            if(robotName.length() == 0) return;
+            if(robotName == null || robotName.length() == 0) return;
             RemoteRobot robot = model.createNewRobot(robotName);
             view.addRobot(robot);
         }

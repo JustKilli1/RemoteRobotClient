@@ -14,7 +14,8 @@ public class ClientModel {
     private List<RemoteRobot> activeRobots = new ArrayList();
 
     public RemoteRobot createNewRobot(String name) {
-        RemoteRobot robot = new RemoteRobot(name);
+        //TODO BUG ID wird nicht richtig gesetzt nach löschen eines Robots. Auf field var umstellen anstatt list size zu benutzen
+        RemoteRobot robot = new RemoteRobot(activeRobots.size(), name);
         activeRobots.add(robot);
         robotThreads.execute(robot);
         return robot;
@@ -27,13 +28,12 @@ public class ClientModel {
     }
 
     public boolean isRobotAtPos(Position pos) {
-        return this.activeRobots.stream().anyMatch((robot) -> robot.isAtPos(pos));
+        return this.activeRobots.stream().anyMatch(robot -> robot.isAtPos(pos));
     }
 
     public void sendCommand(RemoteRobot robot, String cmd) {
     }
 
-    public void changeControlls(RemoteRobot robot) {
+    public void changeControls(RemoteRobot robot) {
     }
-
 }

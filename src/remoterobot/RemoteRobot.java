@@ -4,6 +4,8 @@ import shared.Utils;
 
 import javax.swing.*;
 
+import gui.Design;
+
 public class RemoteRobot implements Runnable{
 
     private int id;
@@ -12,15 +14,21 @@ public class RemoteRobot implements Runnable{
     private Position robotPos;
     private JTextArea console;
 
-    public RemoteRobot(String name) {
+
+    public RemoteRobot(int id, String name, JTextArea console) {
+    	this.id = id;
         this.name = name;
-        console = Utils.createNewConsole();
-        console.append(">> Robot created\n");
-        console.append(">> Robot name set to \"" + name + "\"\n");
+        this.console = console;
+        this.console.append(">> Robot created\n");
+        this.console.append(">> Robot name set to \"" + name + "\"\n");
+    }
+    
+    public RemoteRobot(int id, String name) {
+    	this(id, name, Utils.createNewConsole());
     }
 
     public String toString() {
-        return this.name;
+        return id + ". " + name;
     }
 
     public boolean isAtPos(Position pos) {
@@ -28,16 +36,16 @@ public class RemoteRobot implements Runnable{
     }
 
     public void changeActive() {
-        this.isActive = !this.isActive;
+        isActive = !isActive;
     }
 
     public boolean isActive() {
-        return this.isActive;
+        return isActive;
     }
 
     @Override
     public void run() {
-
+    	
     }
 
     public JTextArea getConsole() { return console; }
