@@ -4,7 +4,6 @@ import remoterobot.RemoteRobot;
 import remoterobot.RobotConsole;
 import shared.logging.LogCategory;
 
-import javax.swing.*;
 import java.util.Arrays;
 import java.util.List;
 
@@ -26,7 +25,7 @@ public class RobotLogger {
      * */
     public void logToConsole(RemoteRobot target, List<String> messages) {
         RobotConsole targetConsole = target.getRobotConsole();
-        messages.forEach(msg -> targetConsole.print(messages));
+        messages.forEach(msg -> targetConsole.print(msg));
     }
 
     /**
