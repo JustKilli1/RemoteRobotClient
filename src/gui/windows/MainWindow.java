@@ -6,11 +6,13 @@ import remoterobot.RemoteRobot;
 import shared.Utils;
 
 import javax.swing.*;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionListener;
 
 import base.Main;
 
 import java.awt.*;
+import java.awt.event.ItemListener;
 import java.util.List;
 import java.awt.event.ActionListener;
 import java.util.Arrays;
@@ -53,8 +55,8 @@ public class MainWindow extends JFrame {
         if(robot == null) return;
         pnlCenter.remove(spConsoleView);
         pnlCenter.remove(pnlRobotCommands);
-        consoleView = robot.getConsole();
-        spConsoleView = Utils.createConsoleContainer(consoleView);
+        consoleView = robot.getRobotConsole().getConsole();
+        spConsoleView = robot.getRobotConsole().buildConsoleView();
         updateRobotView();
         pnlCenter.validate();
         pnlCenter.repaint();
@@ -74,6 +76,10 @@ public class MainWindow extends JFrame {
 
     public void addListSelectionListener(ListSelectionListener listener) {
         this.robotList.addListSelectionListener(listener);
+    }
+
+    public void addItemChangeListener(ItemListener listener) {
+        cbEnableControls.addItemListener(listener);
     }
 
     private void windowInit() {
@@ -105,7 +111,7 @@ public class MainWindow extends JFrame {
         pnlCenter.setBackground(windowDesign.getBackgroundColor());
         buildRobotView();
 
-        add(pnlNorth, "North");
+        //add(pnlNorth, "North");
         add(pnlEast, "East");
         add(pnlSouth, "South");
         add(pnlWest, "West");
@@ -149,7 +155,7 @@ public class MainWindow extends JFrame {
     }
 
     private void buildRobotView() {
-        clientConsole = clientConsole == null ? Utils.createNewConsole() : clientConsole;
+        //clientConsole = clientConsole == null ? Utils.createNewConsole() : clientConsole;
         consoleView = consoleView == null ? clientConsole : consoleView;
         spConsoleView = new JScrollPane(consoleView);
         spConsoleView.setPreferredSize(new Dimension(600, 500));
@@ -182,12 +188,41 @@ public class MainWindow extends JFrame {
         cbEnableControls.setFont(windowDesign.getHeaderFont());
         cbEnableControls.setForeground(windowDesign.getHeaderColor());
 
+
         //pnlRobotCommands.add(tfCommands);
         //pnlRobotCommands.add(btnSendCommand);
         pnlRobotCommands.add(cbEnableControls);
 
         pnlCenter.add(spConsoleView);
         pnlCenter.add(pnlRobotCommands);
+    }
+
+    public void buildRobotStatsView(RemoteRobot robot) {
+        //TODO TEST
+        remove(pnlNorth);
+        pnlNorth = new JPanel();
+        pnlNorth.setBackground(windowDesign.getBackgroundColor());
+        pnlNorth.setPreferredSize(new Dimension(100, 200));
+        JPanel statsView = new JPanel(new GridLayout(3, 1));
+        statsView.setPreferredSize(new Dimension(200, 100));
+        JLabel label = new JLabel("ID: " + robot.getId());
+        JLabel label2 = new JLabel("Name: " + robot.getName());
+        JLabel label3 = new JLabel("Temperatur: " + robot.getTemperature());
+        statsView.add(label);
+        statsView.add(label2);
+        statsView.add(label3);
+        statsView.setBackground(windowDesign.getComponentColor());
+        label.setForeground(windowDesign.getTextColor());
+        label2.setForeground(windowDesign.getTextColor());
+        label3.setForeground(windowDesign.getTextColor());
+        statsView.setBorder(windowDesign.getBorder());
+        label.setFont(windowDesign.getTextFont());
+        label2.setFont(windowDesign.getTextFont());
+        label3.setFont(windowDesign.getTextFont());
+        pnlNorth.add(statsView);
+        add(pnlNorth, "North");
+        this.validate();
+        this.repaint();
     }
     
     private void updateRobotView() {

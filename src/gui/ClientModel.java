@@ -12,10 +12,11 @@ public class ClientModel {
 
     private ExecutorService robotThreads = Executors.newCachedThreadPool();
     private List<RemoteRobot> activeRobots = new ArrayList();
+    private int robotIdCounter = 0;
 
     public RemoteRobot createNewRobot(String name) {
-        //TODO BUG ID wird nicht richtig gesetzt nach löschen eines Robots. Auf field var umstellen anstatt list size zu benutzen
-        RemoteRobot robot = new RemoteRobot(activeRobots.size(), name);
+        robotIdCounter++;
+        RemoteRobot robot = new RemoteRobot(robotIdCounter, name);
         activeRobots.add(robot);
         robotThreads.execute(robot);
         return robot;

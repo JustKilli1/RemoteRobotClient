@@ -10,6 +10,7 @@ import gui.Design;
 import gui.RoundBorder;
 import gui.controller.AddRemoveRobotController;
 import gui.controller.ChangeConsoleController;
+import gui.controller.ChangeControlsController;
 import gui.windows.MainWindow;
 
 public class Main {
@@ -35,6 +36,7 @@ public class Main {
                 ClientModel model = new ClientModel();
                 new AddRemoveRobotController(window, model);
                 new ChangeConsoleController(window, model);
+                new ChangeControlsController(window, model);
                 window.setVisible(true);
             }
         });

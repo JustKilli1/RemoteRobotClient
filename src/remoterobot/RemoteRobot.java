@@ -9,23 +9,20 @@ import gui.Design;
 public class RemoteRobot implements Runnable{
 
     private int id;
+    private double temperature;
     private String name;
     private boolean isActive;
     private Position robotPos;
-    private JTextArea console;
+    private RobotConsole console;
 
 
-    public RemoteRobot(int id, String name, JTextArea console) {
+    public RemoteRobot(int id, String name) {
     	this.id = id;
         this.name = name;
-        this.console = console;
-        this.console.append(">> Robot created\n");
-        this.console.append(">> Robot name set to \"" + name + "\"\n");
+        this.console = new RobotConsole();
+        temperature = 12;
     }
-    
-    public RemoteRobot(int id, String name) {
-    	this(id, name, Utils.createNewConsole());
-    }
+
 
     public String toString() {
         return id + ". " + name;
@@ -48,5 +45,17 @@ public class RemoteRobot implements Runnable{
     	
     }
 
-    public JTextArea getConsole() { return console; }
+    public int getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public double getTemperature() {
+        return temperature;
+    }
+
+    public RobotConsole getRobotConsole() { return console; }
 }
