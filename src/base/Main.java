@@ -3,15 +3,10 @@ package base;
 import java.awt.*;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 
-import gui.ClientModel;
 import gui.Design;
 import gui.RoundBorder;
-import gui.controller.AddRemoveRobotController;
-import gui.controller.ChangeConsoleController;
-import gui.controller.ChangeControlsController;
-import gui.windows.MainWindow;
+
 
 public class Main {
 
@@ -29,16 +24,39 @@ public class Main {
         windowDesign.setHeaderFont(new Font("Arial", Font.BOLD, 17));
         windowDesign.setBorder(new RoundBorder(windowDesign.getComponentColor(), 1, 10, 0));
 
+        gui.windows.TestWindow window = new gui.windows.TestWindow();
+        window.setVisible(true);
+/*        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    for(int i = 0; i < 10; i++) {
+                        Thread.currentThread().sleep(1000);
+                        RobotConsole test = new RobotConsole();
+                        test.print("---------------------------------------------------");
+                        test.print("Durchlauf: " + i);
+                        test.print("Test Nachricht");
+                        test.print("---------------------------------------------------");
+                        window.changeConsole(test);
+                    }
+                } catch(InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                window.change();
+            }
+        }).start();*/
+
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
                 /*BorderPanels borderPanels = new BorderPanels();*/
-                MainWindow window = new MainWindow();
+
+/*                MainWindow window = new MainWindow();
                 ClientModel model = new ClientModel();
                 new AddRemoveRobotController(window, model);
                 new ChangeConsoleController(window, model);
                 new ChangeControlsController(window, model);
-                window.setVisible(true);
+                window.setVisible(true);*/
             }
         });
 	}

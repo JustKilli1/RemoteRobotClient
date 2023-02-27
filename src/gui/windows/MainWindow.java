@@ -122,7 +122,7 @@ public class MainWindow extends JFrame {
     }
 
     private void buildRobotList() {
-        listModel = new DefaultListModel<RemoteRobot>();
+        listModel = new DefaultListModel<>();
         robotList = new JList<>(this.listModel);
         robotList.setBackground(windowDesign.getComponentColor());
         robotList.setForeground(windowDesign.getTextColor());

@@ -23,8 +23,7 @@ public class RobotConsole {
     public void print(List<String> messages) {
         String displayMsg;
         for(int i = 0; i < messages.size(); i++) {
-            displayMsg = CONSOLE_MESSAGE_PREFIX + messages.get(i);
-            if(i + 1 != messages.size()) displayMsg += "\n";
+            displayMsg = CONSOLE_MESSAGE_PREFIX + messages.get(i) + "\n";
             console.append(displayMsg);
         }
     }
@@ -51,6 +50,10 @@ public class RobotConsole {
 
     public JTextArea getConsole() {
         return console;
+    }
+
+    public void setConsole(JTextArea console) {
+        this.console.setText(console.getText());
     }
 
     /**
