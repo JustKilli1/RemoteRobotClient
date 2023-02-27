@@ -3,9 +3,11 @@ package gui.windows;
 import gui.Design;
 import gui.RoundBorder;
 import remoterobot.RemoteRobot;
+import remoterobot.RobotConsole;
 import shared.Utils;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionListener;
 
@@ -40,15 +42,15 @@ public class MainWindow extends JFrame {
     }
 
     public void addRobot(RemoteRobot robot) {
-        this.listModel.add(this.listModel.getSize(), robot);
+        listModel.add(listModel.getSize(), robot);
     }
 
     public boolean removeRobot(RemoteRobot robot) {
-        return this.listModel.removeElement(robot);
+        return listModel.removeElement(robot);
     }
 
     public RemoteRobot getSelectedRobot() {
-        return robotList == null ? null : (RemoteRobot)robotList.getSelectedValue();
+        return robotList == null ? null : robotList.getSelectedValue();
     }
 
     public void changeConsole(RemoteRobot robot) {
@@ -57,7 +59,7 @@ public class MainWindow extends JFrame {
         pnlCenter.remove(pnlRobotCommands);
         consoleView = robot.getRobotConsole().getConsole();
         spConsoleView = robot.getRobotConsole().buildConsoleView();
-        updateRobotView();
+        addCenterPanelComponents();
         pnlCenter.validate();
         pnlCenter.repaint();
     }
@@ -104,11 +106,12 @@ public class MainWindow extends JFrame {
 
         pnlWest = new JPanel();
         pnlWest.setBackground(windowDesign.getBackgroundColor());
-        pnlWest.setPreferredSize(new Dimension(200, 100));
+        pnlWest.setPreferredSize(new Dimension(250, 300));
         buildRobotList();
 
-        pnlCenter = new JPanel();
+        pnlCenter = new JPanel(new GridBagLayout());
         pnlCenter.setBackground(windowDesign.getBackgroundColor());
+        pnlCenter.setPreferredSize(new Dimension(1000, 1000));
         buildRobotView();
 
         //add(pnlNorth, "North");
@@ -120,7 +123,7 @@ public class MainWindow extends JFrame {
 
     private void buildRobotList() {
         listModel = new DefaultListModel<RemoteRobot>();
-        robotList = new JList<RemoteRobot>(this.listModel);
+        robotList = new JList<>(this.listModel);
         robotList.setBackground(windowDesign.getComponentColor());
         robotList.setForeground(windowDesign.getTextColor());
         robotList.setFocusable(false);
@@ -146,25 +149,26 @@ public class MainWindow extends JFrame {
         btnRemoveRobot.setFocusable(false);
         btnRemoveRobot.setFont(windowDesign.getHeaderFont());
         btnRemoveRobot.setBorder(windowDesign.getBorder());
-        
-        pnlWest.setBackground(windowDesign.getBackgroundColor());
-        pnlWest.setPreferredSize(new Dimension(250, 300));
+
         pnlWest.add(this.spRobotList);
         pnlWest.add(this.btnAddRobot);
         pnlWest.add(this.btnRemoveRobot);
     }
 
     private void buildRobotView() {
-        //clientConsole = clientConsole == null ? Utils.createNewConsole() : clientConsole;
+
+        clientConsole = clientConsole == null ? RobotConsole.buildConsole() : clientConsole;
         consoleView = consoleView == null ? clientConsole : consoleView;
+
         spConsoleView = new JScrollPane(consoleView);
         spConsoleView.setPreferredSize(new Dimension(600, 500));
         spConsoleView.setBackground(windowDesign.getComponentColor());
         spConsoleView.setBorder(windowDesign.getBorder());
         
-        pnlRobotCommands = new JPanel();
+        pnlRobotCommands = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         pnlRobotCommands.setPreferredSize(new Dimension(2000, 50));
-        pnlRobotCommands.setBackground(windowDesign.getBackgroundColor());
+        //pnlRobotCommands.setBackground(windowDesign.getBackgroundColor());
+        pnlRobotCommands.setBackground(Color.RED);
 
         tfCommands = new JTextField();
         tfCommands.setPreferredSize(new Dimension(500, 30));
@@ -193,8 +197,26 @@ public class MainWindow extends JFrame {
         //pnlRobotCommands.add(btnSendCommand);
         pnlRobotCommands.add(cbEnableControls);
 
-        pnlCenter.add(spConsoleView);
-        pnlCenter.add(pnlRobotCommands);
+        addCenterPanelComponents();
+    }
+
+    private void addCenterPanelComponents() {
+        GridBagConstraints constraint = new GridBagConstraints();
+
+        constraint.gridx = constraint.gridy = 0;
+        constraint.gridwidth = constraint.gridheight = 1;
+        constraint.fill = GridBagConstraints.BOTH;
+        constraint.anchor = GridBagConstraints.NORTHWEST;
+        constraint.weightx = constraint.weighty = 70;
+        pnlCenter.add(spConsoleView, constraint);
+
+        constraint.gridx = 0;
+        constraint.gridy = 1;
+        constraint.gridwidth = constraint.gridheight = 1;
+        constraint.fill = GridBagConstraints.BOTH;
+        constraint.anchor = GridBagConstraints.EAST;
+        constraint.weightx = constraint.weighty = 20;
+        pnlCenter.add(pnlRobotCommands, constraint);
     }
 
     public void buildRobotStatsView(RemoteRobot robot) {
@@ -224,10 +246,4 @@ public class MainWindow extends JFrame {
         this.validate();
         this.repaint();
     }
-    
-    private void updateRobotView() {
-    	 pnlCenter.add(spConsoleView);
-         pnlCenter.add(pnlRobotCommands);
-    }
-
 }

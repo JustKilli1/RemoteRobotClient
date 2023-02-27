@@ -13,7 +13,7 @@ public class RobotConsole {
     private JTextArea console;
 
     public RobotConsole() {
-        buildConsole();
+        console = buildConsole();
     }
 
     /**
@@ -56,13 +56,14 @@ public class RobotConsole {
     /**
      * Builds a Console with the given Design
      * */
-    private void buildConsole() {
-        console = new JTextArea(10, 1);
-        console.setPreferredSize(new Dimension(500, 400));
-        console.setEditable(false);
-        console.setFont(Main.windowDesign.getTextFont());
-        console.setBackground(Main.windowDesign.getComponentColor());
-        console.setForeground(Main.windowDesign.getTextColor());
+    public static JTextArea buildConsole() {
+        JTextArea newConsole = new JTextArea(10, 1);
+        newConsole.setPreferredSize(new Dimension(500, 400));
+        newConsole.setEditable(false);
+        newConsole.setFont(Main.windowDesign.getTextFont());
+        newConsole.setBackground(Main.windowDesign.getComponentColor());
+        newConsole.setForeground(Main.windowDesign.getTextColor());
+        return newConsole;
     }
 
 }

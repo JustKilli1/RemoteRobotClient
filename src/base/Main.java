@@ -1,9 +1,9 @@
 package base;
 
-import java.awt.Color;
-import java.awt.Font;
+import java.awt.*;
 
-import javax.swing.SwingUtilities;
+import javax.swing.*;
+import javax.swing.border.Border;
 
 import gui.ClientModel;
 import gui.Design;
@@ -32,6 +32,7 @@ public class Main {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
+                /*BorderPanels borderPanels = new BorderPanels();*/
                 MainWindow window = new MainWindow();
                 ClientModel model = new ClientModel();
                 new AddRemoveRobotController(window, model);
@@ -41,4 +42,6 @@ public class Main {
             }
         });
 	}
+
+
 }

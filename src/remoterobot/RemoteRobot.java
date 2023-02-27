@@ -20,6 +20,7 @@ public class RemoteRobot implements Runnable{
     	this.id = id;
         this.name = name;
         this.console = new RobotConsole();
+        console.print("Robot with the name " + name + " created");
         temperature = 12;
     }
 
