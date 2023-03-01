@@ -1,7 +1,7 @@
 package shared.logging.type;
 
-import remoterobot.RemoteRobot;
-import remoterobot.RobotConsole;
+import exo.remoterobot.RemoteRobot;
+import exo.remoterobot.RobotConsole;
 import shared.logging.LogCategory;
 
 import java.util.Arrays;

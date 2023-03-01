@@ -1,44 +1,35 @@
 package gui.windows;
 
 import gui.Design;
-import gui.RoundBorder;
-import remoterobot.RemoteRobot;
-import remoterobot.RobotConsole;
-import shared.Utils;
+import exo.remoterobot.RemoteRobot;
+import exo.remoterobot.RobotConsole;
 
 import javax.swing.*;
-import javax.swing.border.Border;
-import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionListener;
 
 import base.Main;
+import shared.Utils;
 
 import java.awt.*;
 import java.awt.event.ItemListener;
-import java.util.List;
 import java.awt.event.ActionListener;
-import java.util.Arrays;
 
 public class MainWindow extends JFrame {
-
-    private static final long serialVersionUID = 1L;
-    private Design windowDesign;
-    private JPanel pnlNorth, pnlEast, pnlSouth, pnlWest, pnlCenter, pnlRobotCommands;
-    private JList<RemoteRobot> robotList;
+    private Design design;
+    private JPanel pnlMain;
+    private JScrollPane spRobotList, spRobotConsoleView;
+    private JList<RemoteRobot> lRobotList;
     private DefaultListModel<RemoteRobot> listModel = new DefaultListModel<>();
-    private JScrollPane spRobotList, spConsoleView;
-    private JButton btnAddRobot;
-    private JButton btnRemoveRobot;
-    private JButton btnSendCommand;
-    private JTextArea clientConsole;
-    private JTextArea consoleView;
-    private JTextField tfCommands;
+    private JButton btnAddRobot, btnRemoveRobot;
+    private RobotConsole robotConsole;
     private JCheckBox cbEnableControls;
+    private GridBagConstraints constraint;
+
 
     public MainWindow() {
-        this.windowDesign = Main.windowDesign;
-        this.windowInit();
-        this.build();
+        design = Main.windowDesign;
+        windowInit();
+        build();
     }
 
     public void addRobot(RemoteRobot robot) {
@@ -50,38 +41,27 @@ public class MainWindow extends JFrame {
     }
 
     public RemoteRobot getSelectedRobot() {
-        return robotList == null ? null : robotList.getSelectedValue();
+        return lRobotList == null ? null : lRobotList.getSelectedValue();
     }
-
-    public void changeConsole(RemoteRobot robot) {
-        if(robot == null) return;
-        pnlCenter.remove(spConsoleView);
-        pnlCenter.remove(pnlRobotCommands);
-        consoleView = robot.getRobotConsole().getConsole();
-        spConsoleView = robot.getRobotConsole().buildConsoleView();
-        addCenterPanelComponents();
-        pnlCenter.validate();
-        pnlCenter.repaint();
-    }
-
     public void addRobotAddActionListener(ActionListener listener) {
-        this.btnAddRobot.addActionListener(listener);
+        btnAddRobot.addActionListener(listener);
     }
 
     public void addRobotRemoveActionListener(ActionListener listener) {
-        this.btnRemoveRobot.addActionListener(listener);
-    }
-
-    public void addSendCommandActionListener(ActionListener listener) {
-        this.btnSendCommand.addActionListener(listener);
+        btnRemoveRobot.addActionListener(listener);
     }
 
     public void addListSelectionListener(ListSelectionListener listener) {
-        this.robotList.addListSelectionListener(listener);
+        lRobotList.addListSelectionListener(listener);
     }
 
     public void addItemChangeListener(ItemListener listener) {
         cbEnableControls.addItemListener(listener);
+    }
+
+    public void changeConsole(RemoteRobot robot) {
+        if(robot == null)  robotConsole.setConsole(null);
+        else robotConsole.setConsole(robot.getRobotConsole().getConsole());
     }
 
     private void windowInit() {
@@ -91,159 +71,111 @@ public class MainWindow extends JFrame {
     }
 
     private void build() {
+        constraint = new GridBagConstraints();
+        constraint.fill = GridBagConstraints.BOTH;
+        constraint.anchor = GridBagConstraints.NORTHWEST;
+        constraint.insets = new Insets(20, 20, 20, 20);
+        pnlMain = new JPanel(new GridBagLayout());
+        pnlMain.setBackground(design.getBackgroundColor());
 
-        pnlNorth = new JPanel();
-        pnlNorth.setBackground(windowDesign.getBackgroundColor());
-        pnlNorth.setPreferredSize(new Dimension(100, 200));
-
-        pnlEast = new JPanel();
-        pnlEast.setBackground(windowDesign.getBackgroundColor());
-        pnlEast.setPreferredSize(new Dimension(50, 100));
-
-        pnlSouth = new JPanel();
-        pnlSouth.setBackground(windowDesign.getBackgroundColor());
-        pnlSouth.setPreferredSize(new Dimension(100, 50));
-
-        pnlWest = new JPanel();
-        pnlWest.setBackground(windowDesign.getBackgroundColor());
-        pnlWest.setPreferredSize(new Dimension(250, 300));
         buildRobotList();
-
-        pnlCenter = new JPanel(new GridBagLayout());
-        pnlCenter.setBackground(windowDesign.getBackgroundColor());
-        pnlCenter.setPreferredSize(new Dimension(1000, 1000));
         buildRobotView();
 
-        //add(pnlNorth, "North");
-        add(pnlEast, "East");
-        add(pnlSouth, "South");
-        add(pnlWest, "West");
-        add(pnlCenter, "Center");
+        add(pnlMain);
     }
 
     private void buildRobotList() {
         listModel = new DefaultListModel<>();
-        robotList = new JList<>(this.listModel);
-        robotList.setBackground(windowDesign.getComponentColor());
-        robotList.setForeground(windowDesign.getTextColor());
-        robotList.setFocusable(false);
-        robotList.setFont(windowDesign.getTextFont());
 
-        spRobotList = new JScrollPane(this.robotList);
-        spRobotList.setPreferredSize(new Dimension(200, 500));
-        spRobotList.setBackground(windowDesign.getComponentColor());
-        spRobotList.setBorder(windowDesign.getBorder());
-        spRobotList.getHorizontalScrollBar().setBackground(windowDesign.getComponentColor());
-        spRobotList.getVerticalScrollBar().setBackground(windowDesign.getComponentColor());
+        lRobotList = new JList<>(listModel);
+        lRobotList.setBackground(design.getComponentColor());
+        lRobotList.setForeground(design.getTextColor());
+        lRobotList.setFocusable(false);
+        lRobotList.setFont(design.getTextFont());
+
+        spRobotList = new JScrollPane(lRobotList);
+        spRobotList.setBackground(design.getComponentColor());
+        spRobotList.setBorder(design.getBorder());
+        spRobotList.getHorizontalScrollBar().setBackground(design.getComponentColor());
+        spRobotList.getVerticalScrollBar().setBackground(design.getComponentColor());
 
         btnAddRobot = new JButton("Add");
-        btnAddRobot.setBackground(windowDesign.getComponentColor());
-        btnAddRobot.setForeground(windowDesign.getHeaderColor());
+        btnAddRobot.setBackground(design.getComponentColor());
+        btnAddRobot.setForeground(design.getHeaderColor());
         btnAddRobot.setFocusable(false);
-        btnAddRobot.setFont(windowDesign.getHeaderFont());
-        btnAddRobot.setBorder(windowDesign.getBorder());
+        btnAddRobot.setFont(design.getHeaderFont());
+        btnAddRobot.setBorder(design.getBorder());
 
         btnRemoveRobot = new JButton("Remove");
-        btnRemoveRobot.setBackground(windowDesign.getComponentColor());
-        btnRemoveRobot.setForeground(windowDesign.getHeaderColor());
+        btnRemoveRobot.setBackground(design.getComponentColor());
+        btnRemoveRobot.setForeground(design.getHeaderColor());
         btnRemoveRobot.setFocusable(false);
-        btnRemoveRobot.setFont(windowDesign.getHeaderFont());
-        btnRemoveRobot.setBorder(windowDesign.getBorder());
+        btnRemoveRobot.setFont(design.getHeaderFont());
+        btnRemoveRobot.setBorder(design.getBorder());
 
-        pnlWest.add(this.spRobotList);
-        pnlWest.add(this.btnAddRobot);
-        pnlWest.add(this.btnRemoveRobot);
+
+        constraint.gridx = constraint.gridy = 0;
+        constraint.gridwidth = 2;
+        constraint.gridheight = 6;
+        constraint.weightx = constraint.weighty = 10;
+        constraint.insets = new Insets(50, 50, 0, 20);
+        pnlMain.add(spRobotList, constraint);
+
+        constraint.gridx = 0;
+        constraint.gridy = 6;
+        constraint.gridwidth = constraint.gridheight = 1;
+        constraint.weightx = constraint.weighty = 5;
+        constraint.insets = new Insets(20, 50, 50, 10);
+        pnlMain.add(btnAddRobot, constraint);
+
+        constraint.gridx = 1;
+        constraint.gridy = 6;
+        constraint.gridwidth = constraint.gridheight = 1;
+        constraint.weightx = constraint.weighty = 5;
+        constraint.insets = new Insets(20, 10, 50, 20);
+        pnlMain.add(btnRemoveRobot, constraint);
     }
 
     private void buildRobotView() {
-
-        clientConsole = clientConsole == null ? RobotConsole.buildConsole() : clientConsole;
-        consoleView = consoleView == null ? clientConsole : consoleView;
-
-        spConsoleView = new JScrollPane(consoleView);
-        spConsoleView.setPreferredSize(new Dimension(600, 500));
-        spConsoleView.setBackground(windowDesign.getComponentColor());
-        spConsoleView.setBorder(windowDesign.getBorder());
-        
-        pnlRobotCommands = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        pnlRobotCommands.setPreferredSize(new Dimension(2000, 50));
-        //pnlRobotCommands.setBackground(windowDesign.getBackgroundColor());
-        pnlRobotCommands.setBackground(Color.RED);
-
-        tfCommands = new JTextField();
-        tfCommands.setPreferredSize(new Dimension(500, 30));
-        tfCommands.setFont(windowDesign.getTextFont());
-        tfCommands.setBorder(windowDesign.getBorder());
-        tfCommands.setForeground(windowDesign.getTextColor());
-        tfCommands.setBackground(windowDesign.getComponentColor());
-        tfCommands.setCaretColor(Color.WHITE);
-
-        btnSendCommand = new JButton("Send");
-        btnSendCommand.setPreferredSize(new Dimension(100, 30));
-        btnSendCommand.setFont(windowDesign.getHeaderFont());
-        btnSendCommand.setBorder(windowDesign.getBorder());
-        btnSendCommand.setForeground(windowDesign.getHeaderColor());
-        btnSendCommand.setBackground(windowDesign.getComponentColor());
-        btnSendCommand.setFocusable(false);
+        robotConsole = new RobotConsole();
+        spRobotConsoleView = robotConsole.buildConsoleView();
 
         cbEnableControls = new JCheckBox("Enable Controls");
-        cbEnableControls.setBorder(windowDesign.getBorder());
-        cbEnableControls.setBackground(windowDesign.getComponentColor());
-        cbEnableControls.setFont(windowDesign.getHeaderFont());
-        cbEnableControls.setForeground(windowDesign.getHeaderColor());
+        cbEnableControls.setBorder(design.getBorder());
+        cbEnableControls.setBackground(design.getComponentColor());
+        cbEnableControls.setFont(design.getHeaderFont());
+        cbEnableControls.setForeground(design.getHeaderColor());
+        cbEnableControls.setPreferredSize(new Dimension(30, 20));
 
-
-        //pnlRobotCommands.add(tfCommands);
-        //pnlRobotCommands.add(btnSendCommand);
-        pnlRobotCommands.add(cbEnableControls);
-
-        addCenterPanelComponents();
-    }
-
-    private void addCenterPanelComponents() {
-        GridBagConstraints constraint = new GridBagConstraints();
-
-        constraint.gridx = constraint.gridy = 0;
-        constraint.gridwidth = constraint.gridheight = 1;
-        constraint.fill = GridBagConstraints.BOTH;
-        constraint.anchor = GridBagConstraints.NORTHWEST;
-        constraint.weightx = constraint.weighty = 70;
-        pnlCenter.add(spConsoleView, constraint);
-
-        constraint.gridx = 0;
+        constraint.gridx = 2;
         constraint.gridy = 1;
+        constraint.gridwidth = 3;
+        constraint.gridheight = 5;
+        constraint.weightx = constraint.weighty = 65;
+        constraint.insets = new Insets(50, 0, 0, 50);
+        pnlMain.add(spRobotConsoleView, constraint);
+
+        constraint.gridx = 2;
+        constraint.gridy = 6;
         constraint.gridwidth = constraint.gridheight = 1;
-        constraint.fill = GridBagConstraints.BOTH;
-        constraint.anchor = GridBagConstraints.EAST;
-        constraint.weightx = constraint.weighty = 20;
-        pnlCenter.add(pnlRobotCommands, constraint);
+        constraint.weightx = constraint.weighty = 5;
+        constraint.insets = new Insets(20, 20, 20, 20);
+        pnlMain.add(Utils.createFillerPanel(design, false), constraint);
+
+        constraint.gridx = 3;
+        constraint.gridy = 6;
+        constraint.gridwidth = 1;
+        constraint.gridheight = 2;
+        constraint.weightx = constraint.weighty = 5;
+        constraint.insets = new Insets(20, 20, 20, 20);
+        pnlMain.add(Utils.createFillerPanel(design, false), constraint);
+
+        constraint.gridx = 4;
+        constraint.gridy = 6;
+        constraint.gridwidth = constraint.gridheight = 1;
+        constraint.weightx = constraint.weighty = 5;
+        constraint.insets = new Insets(20, 20, 50, 50);
+        pnlMain.add(cbEnableControls, constraint);
     }
 
-    public void buildRobotStatsView(RemoteRobot robot) {
-        //TODO TEST
-        remove(pnlNorth);
-        pnlNorth = new JPanel();
-        pnlNorth.setBackground(windowDesign.getBackgroundColor());
-        pnlNorth.setPreferredSize(new Dimension(100, 200));
-        JPanel statsView = new JPanel(new GridLayout(3, 1));
-        statsView.setPreferredSize(new Dimension(200, 100));
-        JLabel label = new JLabel("ID: " + robot.getId());
-        JLabel label2 = new JLabel("Name: " + robot.getName());
-        JLabel label3 = new JLabel("Temperatur: " + robot.getTemperature());
-        statsView.add(label);
-        statsView.add(label2);
-        statsView.add(label3);
-        statsView.setBackground(windowDesign.getComponentColor());
-        label.setForeground(windowDesign.getTextColor());
-        label2.setForeground(windowDesign.getTextColor());
-        label3.setForeground(windowDesign.getTextColor());
-        statsView.setBorder(windowDesign.getBorder());
-        label.setFont(windowDesign.getTextFont());
-        label2.setFont(windowDesign.getTextFont());
-        label3.setFont(windowDesign.getTextFont());
-        pnlNorth.add(statsView);
-        add(pnlNorth, "North");
-        this.validate();
-        this.repaint();
-    }
 }

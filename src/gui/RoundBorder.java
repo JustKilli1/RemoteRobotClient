@@ -9,7 +9,6 @@ public class RoundBorder extends AbstractBorder {
     private Color color;
     private int thickness = 4;
     private int radii = 8;
-    private int pointerSize = 7;
     private Insets insets = null;
     private BasicStroke stroke = null;
     private int strokePad;
@@ -18,13 +17,12 @@ public class RoundBorder extends AbstractBorder {
     RenderingHints hints;
 
     public RoundBorder(Color color) {
-        this(color, 4, 8, 7);
+        this(color, 4, 8);
     }
 
-    public RoundBorder(Color color, int thickness, int radii, int pointerSize) {
+    public RoundBorder(Color color, int thickness, int radii) {
         this.thickness = thickness;
         this.radii = radii;
-        this.pointerSize = pointerSize;
         this.color = color;
         stroke = new BasicStroke(thickness);
         strokePad = thickness / 2;
@@ -32,12 +30,11 @@ public class RoundBorder extends AbstractBorder {
                 RenderingHints.KEY_ANTIALIASING,
                 RenderingHints.VALUE_ANTIALIAS_ON);
         int pad = radii + strokePad;
-        int bottomPad = pad + pointerSize + strokePad;
-        insets = new Insets(pad, pad, bottomPad, pad);
+        insets = new Insets(pad, pad, pad, pad);
     }
 
-    public RoundBorder(Color color, int thickness, int radii, int pointerSize, boolean left) {
-        this(color, thickness, radii, pointerSize);
+    public RoundBorder(Color color, int thickness, int radii, boolean left) {
+        this(color, thickness, radii);
         this.left = left;
     }
 
@@ -52,7 +49,7 @@ public class RoundBorder extends AbstractBorder {
     @Override
     public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
         Graphics2D g2 = (Graphics2D) g;
-        int bottomLineY = height - thickness - pointerSize;
+        int bottomLineY = height - thickness;
         RoundRectangle2D.Double bubble = new RoundRectangle2D.Double(
                 0 + strokePad,
                 0 + strokePad,
@@ -68,11 +65,11 @@ public class RoundBorder extends AbstractBorder {
                     bottomLineY);
             // right point
             pointer.addPoint(
-                    strokePad + radii + pointerPad + pointerSize,
+                    strokePad + radii + pointerPad,
                     bottomLineY);
             // bottom point
             pointer.addPoint(
-                    strokePad + radii + pointerPad + (pointerSize / 2),
+                    strokePad + radii + pointerPad,
                     height - strokePad);
         } else {
             // left point
@@ -81,11 +78,11 @@ public class RoundBorder extends AbstractBorder {
                     bottomLineY);
             // right point
             pointer.addPoint(
-                    width - (strokePad + radii + pointerPad + pointerSize),
+                    width - (strokePad + radii + pointerPad),
                     bottomLineY);
             // bottom point
             pointer.addPoint(
-                    width - (strokePad + radii + pointerPad + (pointerSize / 2)),
+                    width - (strokePad + radii + pointerPad),
                     height - strokePad);
         }
         Area area = new Area(bubble);

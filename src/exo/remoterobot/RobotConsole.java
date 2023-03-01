@@ -1,4 +1,4 @@
-package remoterobot;
+package exo.remoterobot;
 
 import base.Main;
 
@@ -53,7 +53,8 @@ public class RobotConsole {
     }
 
     public void setConsole(JTextArea console) {
-        this.console.setText(console.getText());
+        if(console == null) this.console.setText("");
+        else this.console.setText(console.getText());
     }
 
     /**

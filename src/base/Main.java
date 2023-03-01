@@ -4,8 +4,14 @@ import java.awt.*;
 
 import javax.swing.*;
 
+import exo.remoterobot.RobotConsole;
+import gui.ClientModel;
 import gui.Design;
 import gui.RoundBorder;
+import gui.controller.AddRemoveRobotController;
+import gui.controller.ChangeConsoleController;
+import gui.controller.ChangeControlsController;
+import gui.windows.MainWindow;
 
 
 public class Main {
@@ -22,11 +28,11 @@ public class Main {
         windowDesign.setHeaderColor(new Color(220, 220, 220));
         windowDesign.setTextFont(new Font("Arial", Font.PLAIN, 13));
         windowDesign.setHeaderFont(new Font("Arial", Font.BOLD, 17));
-        windowDesign.setBorder(new RoundBorder(windowDesign.getComponentColor(), 1, 10, 0));
+        windowDesign.setBorder(new RoundBorder(windowDesign.getComponentColor(), 1, 10));
 
-        gui.windows.TestWindow window = new gui.windows.TestWindow();
-        window.setVisible(true);
-/*        new Thread(new Runnable() {
+/*        gui.windows.TestWindow window = new gui.windows.TestWindow();*/
+/*        window.setVisible(true);
+        new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -49,14 +55,12 @@ public class Main {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                /*BorderPanels borderPanels = new BorderPanels();*/
-
-/*                MainWindow window = new MainWindow();
+                MainWindow window = new MainWindow();
                 ClientModel model = new ClientModel();
                 new AddRemoveRobotController(window, model);
                 new ChangeConsoleController(window, model);
                 new ChangeControlsController(window, model);
-                window.setVisible(true);*/
+                window.setVisible(true);
             }
         });
 	}

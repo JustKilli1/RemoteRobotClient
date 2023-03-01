@@ -1,7 +1,7 @@
 package gui;
 
-import remoterobot.Position;
-import remoterobot.RemoteRobot;
+import exo.remoterobot.Position;
+import exo.remoterobot.RemoteRobot;
 
 import java.util.ArrayList;
 import java.util.List;

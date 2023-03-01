@@ -5,6 +5,7 @@ import java.awt.*;
 
 import static java.awt.GridBagConstraints.RELATIVE;
 
+@Deprecated
 public class ConstraintBuilder {
 
     private GridBagConstraints constraint;

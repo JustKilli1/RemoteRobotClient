@@ -1,10 +1,5 @@
-package remoterobot;
+package exo.remoterobot;
 
-import shared.Utils;
-
-import javax.swing.*;
-
-import gui.Design;
 
 public class RemoteRobot implements Runnable{
 
@@ -20,7 +15,7 @@ public class RemoteRobot implements Runnable{
     	this.id = id;
         this.name = name;
         this.console = new RobotConsole();
-        console.print("Robot with the name " + name + " created");
+        console.print("Robot \"" + name + "\" created");
         temperature = 12;
     }
 
@@ -43,7 +38,13 @@ public class RemoteRobot implements Runnable{
 
     @Override
     public void run() {
-    	
+    	while(isActive) {
+
+        }
+    }
+
+    public void receiveResponse(String response) {
+
     }
 
     public int getId() {

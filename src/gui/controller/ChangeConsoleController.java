@@ -2,7 +2,7 @@ package gui.controller;
 
 import gui.ClientModel;
 import gui.windows.MainWindow;
-import remoterobot.RemoteRobot;
+import exo.remoterobot.RemoteRobot;
 
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -37,7 +37,6 @@ public class ChangeConsoleController {
         public void valueChanged(ListSelectionEvent e) {
             RemoteRobot robot = view.getSelectedRobot();
             view.changeConsole(robot);
-            view.buildRobotStatsView(robot);
         }
     }
 

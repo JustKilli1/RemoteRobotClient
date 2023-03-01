@@ -2,7 +2,7 @@ package gui.controller;
 
 import gui.ClientModel;
 import gui.windows.MainWindow;
-import remoterobot.RemoteRobot;
+import exo.remoterobot.RemoteRobot;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
