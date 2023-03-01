@@ -105,5 +105,10 @@ public class Position {
 	public Position clone() {
 		return new Position(x, y, dir);
 	}
+
+	public boolean inBounds() {
+		if(x < 0 || y < 0) return false;
+		return true;
+	}
 	
 }

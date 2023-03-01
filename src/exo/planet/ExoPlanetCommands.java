@@ -32,4 +32,9 @@ public class ExoPlanetCommands {
     public static String exit() {
         return "exit";
     }
+
+    public static String charge(int duration) {
+        return "charge:" + duration;
+    }
+
 }

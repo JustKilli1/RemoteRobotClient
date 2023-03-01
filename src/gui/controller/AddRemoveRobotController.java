@@ -23,8 +23,8 @@ public class AddRemoveRobotController {
     private ClientModel model;
 
 
-    public AddRemoveRobotController(MainWindow view, ClientModel model) {
-        this.view = view;
+    public AddRemoveRobotController(ClientModel model) {
+        this.view = MainWindow.getInstance();
         this.model = model;
         this.view.addRobotAddActionListener(new AddActionListener());
         this.view.addRobotRemoveActionListener(new RemoveActionListener());

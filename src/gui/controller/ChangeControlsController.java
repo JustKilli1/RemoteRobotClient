@@ -1,10 +1,13 @@
 package gui.controller;
 
 import exo.planet.ExoPlanetCommands;
+import exo.remoterobot.RemoteRobot;
 import exo.remoterobot.Rotation;
 import gui.ClientModel;
 import gui.windows.MainWindow;
+import shared.Utils;
 
+import javax.swing.*;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
@@ -23,28 +26,34 @@ public class ChangeControlsController {
 
     private MainWindow view;
     private ClientModel model;
+    private static boolean enableControls;
 
-    public ChangeControlsController(MainWindow view, ClientModel model) {
-        this.view = view;
+    public ChangeControlsController(ClientModel model) {
+        this.view = MainWindow.getInstance();
         this.model = model;
+        enableControls = true;
         view.addItemChangeListener(new SwitchControlsChangeListener());
-
+        view.addWindowKeyListener(new RobotControlsKeyListener());
     }
 
 
-    private class SwitchControlsChangeListener implements ItemListener {
+    public class SwitchControlsChangeListener implements ItemListener {
 
         @Override
         public void itemStateChanged(ItemEvent e) {
             if(e.getStateChange() == 1) {
-                System.out.println(e.getStateChange());
-                System.out.println(view.getSelectedRobot().getName());
+                enableControls = true;
+            } else {
+                enableControls = false;
+                RemoteRobot robot = MainWindow.getInstance().getSelectedRobot();
+                if(robot == null) return;
+                robot.sendCommand(ExoPlanetCommands.scan());
             }
 
         }
     }
 
-    private class RobotControlsKeyListener implements KeyListener {
+    public class RobotControlsKeyListener implements KeyListener {
 
         @Override
         public void keyTyped(KeyEvent e) {
@@ -53,23 +62,32 @@ public class ChangeControlsController {
 
         @Override
         public void keyPressed(KeyEvent e) {
-
         }
 
         @Override
         public void keyReleased(KeyEvent e) {
+            RemoteRobot robot = view.getSelectedRobot();
+            if(robot == null) return;
             if(e.getKeyCode()== KeyEvent.VK_RIGHT) {
 
             } else if(e.getKeyCode()== KeyEvent.VK_Q) {
-                robot.sendCommand(ExoPlanetCommands.rotate(Rotation.LEFT));
+                if(enableControls) robot.sendCommand(ExoPlanetCommands.rotate(Rotation.LEFT));
             } else if(e.getKeyCode()== KeyEvent.VK_E) {
-                robot.sendCommand(ExoPlanetCommands.rotate(Rotation.RIGHT));
-            } else if(e.getKeyCode()== KeyEvent.VK_SPACE) {
-                robot.sendCommand(ExoPlanetCommands.moveScan());
+                if(enableControls) robot.sendCommand(ExoPlanetCommands.rotate(Rotation.RIGHT));
+            } else if(e.getKeyCode()== KeyEvent.VK_D) {
+                if(enableControls) robot.sendCommand(ExoPlanetCommands.moveScan());
             } else if(e.getKeyCode()== KeyEvent.VK_S) {
-                robot.sendCommand(ExoPlanetCommands.scan());
+                    if(enableControls) robot.sendCommand(ExoPlanetCommands.scan());
+            } else if(e.getKeyCode() == KeyEvent.VK_F) {
+                if(enableControls) {
+                    String duration = JOptionPane.showInputDialog(view, "Bitte Dauer eingeben", "in sekunden");
+                    if(duration == null || duration.length() == 0) return;
+                    robot.sendCommand(ExoPlanetCommands.charge(Utils.toInt(duration).get()));
+                }
             }
         }
     }
+
+    public static boolean isEnableControls() {return enableControls;}
 
 }

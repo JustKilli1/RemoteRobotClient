@@ -52,14 +52,17 @@ public class Main {
             }
         }).start();*/
 
+/*        TestWindow testWindow = new TestWindow();*/
+
+
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                MainWindow window = new MainWindow();
-                ClientModel model = new ClientModel();
-                new AddRemoveRobotController(window, model);
-                new ChangeConsoleController(window, model);
-                new ChangeControlsController(window, model);
+                MainWindow window = MainWindow.getInstance();
+                ClientModel model = new ClientModel(windowDesign);
+                new AddRemoveRobotController(model);
+/*                new ChangeConsoleController(model);*/
+                new ChangeControlsController(model);
                 window.setVisible(true);
             }
         });

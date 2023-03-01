@@ -1,6 +1,7 @@
 package gui.controller;
 
 import gui.ClientModel;
+import gui.OutputManager;
 import gui.windows.MainWindow;
 import exo.remoterobot.RemoteRobot;
 
@@ -21,8 +22,8 @@ public class ChangeConsoleController {
     private MainWindow view;
     private ClientModel model;
 
-    public ChangeConsoleController(MainWindow view, ClientModel model) {
-        this.view = view;
+    public ChangeConsoleController(ClientModel model) {
+        this.view = MainWindow.getInstance();
         this.model = model;
 
         view.addListSelectionListener(new ChangeConsoleListSelectionListener());
@@ -36,7 +37,7 @@ public class ChangeConsoleController {
         @Override
         public void valueChanged(ListSelectionEvent e) {
             RemoteRobot robot = view.getSelectedRobot();
-            view.changeConsole(robot);
+            OutputManager.setActiveRobot(robot);
         }
     }
 

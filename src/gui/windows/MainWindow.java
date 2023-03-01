@@ -1,5 +1,9 @@
 package gui.windows;
 
+import exo.planet.Ground;
+import exo.planet.PlanetView;
+import exo.remoterobot.MeasureData;
+import exo.remoterobot.Position;
 import gui.Design;
 import exo.remoterobot.RemoteRobot;
 import exo.remoterobot.RobotConsole;
@@ -13,31 +17,41 @@ import shared.Utils;
 import java.awt.*;
 import java.awt.event.ItemListener;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainWindow extends JFrame {
+    private static MainWindow instance = new MainWindow();
     private Design design;
-    private JPanel pnlMain;
-    private JScrollPane spRobotList, spRobotConsoleView;
+    private JPanel pnlMain, pnlPlanetView;
+    private PlanetView planetView;
+    private JScrollPane spRobotList;
     private JList<RemoteRobot> lRobotList;
     private DefaultListModel<RemoteRobot> listModel = new DefaultListModel<>();
     private JButton btnAddRobot, btnRemoveRobot;
-    private RobotConsole robotConsole;
     private JCheckBox cbEnableControls;
     private GridBagConstraints constraint;
 
 
-    public MainWindow() {
+    private MainWindow() {
         design = Main.windowDesign;
         windowInit();
         build();
     }
 
+    public static MainWindow getInstance() {
+        return instance;
+    }
+
     public void addRobot(RemoteRobot robot) {
         listModel.add(listModel.getSize(), robot);
+        setSelectedRobot();
     }
 
     public boolean removeRobot(RemoteRobot robot) {
+        planetView.removeRobot(robot);
         return listModel.removeElement(robot);
     }
 
@@ -56,18 +70,49 @@ public class MainWindow extends JFrame {
         lRobotList.addListSelectionListener(listener);
     }
 
+    public void addWindowKeyListener(KeyListener listener) {
+        addKeyListener(listener);
+        pnlMain.addKeyListener(listener);
+        pnlPlanetView.addKeyListener(listener);
+        spRobotList.addKeyListener(listener);
+        lRobotList.addKeyListener(listener);
+        btnAddRobot.addKeyListener(listener);
+        btnRemoveRobot.addKeyListener(listener);
+        cbEnableControls.addKeyListener(listener);
+    }
+
     public void addItemChangeListener(ItemListener listener) {
         cbEnableControls.addItemListener(listener);
     }
-    public void addKeyListener(KeyListener listener) { addKeyListener(listener); }
+    public void changeRobotPos(RemoteRobot robot, Position pos) {
+        planetView.changeRobotPos(robot, pos);
+    }
 
-    public void changeConsole(RemoteRobot robot) {
-        if(robot == null)  robotConsole.setConsole(null);
-        else robotConsole.setConsole(robot.getRobotConsole().getConsole());
+    public PlanetView changePlanetView(PlanetView planetView) {
+        pnlMain.remove(pnlPlanetView);
+        PlanetView oldPlanetView = null;
+        if(this.planetView != null) oldPlanetView = this.planetView.clone();
+        this.planetView = planetView;
+        pnlPlanetView = planetView.getPlanetView();
+        constraint.gridx = 2;
+        constraint.gridy = 1;
+        constraint.gridwidth = 3;
+        constraint.gridheight = 5;
+        constraint.weightx = constraint.weighty = 65;
+        constraint.insets = new Insets(50, 0, 0, 50);
+        pnlMain.add(pnlPlanetView, constraint);
+        pnlMain.validate();
+        return oldPlanetView;
+    }
+
+    public void addGround(Position pos, MeasureData measureData) {
+        if(planetView == null) return;
+        planetView.addGround(pos, measureData);
     }
 
     private void windowInit() {
-        setSize(new Dimension(1000, 1000));
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        setSize(new Dimension(screenSize.width, screenSize.height));
         setDefaultCloseOperation(3);
         getContentPane().setLayout(new BorderLayout());
     }
@@ -139,8 +184,9 @@ public class MainWindow extends JFrame {
     }
 
     private void buildRobotView() {
-        robotConsole = new RobotConsole();
-        spRobotConsoleView = robotConsole.buildConsoleView();
+        //robotConsole = new RobotConsole();
+        //spRobotConsoleView = robotConsole.buildConsoleView();
+        pnlPlanetView = Utils.createFillerPanel(design, true);
 
         cbEnableControls = new JCheckBox("Enable Controls");
         cbEnableControls.setBorder(design.getBorder());
@@ -148,6 +194,7 @@ public class MainWindow extends JFrame {
         cbEnableControls.setFont(design.getHeaderFont());
         cbEnableControls.setForeground(design.getHeaderColor());
         cbEnableControls.setPreferredSize(new Dimension(30, 20));
+        cbEnableControls.setSelected(true);
 
         constraint.gridx = 2;
         constraint.gridy = 1;
@@ -155,7 +202,7 @@ public class MainWindow extends JFrame {
         constraint.gridheight = 5;
         constraint.weightx = constraint.weighty = 65;
         constraint.insets = new Insets(50, 0, 0, 50);
-        pnlMain.add(spRobotConsoleView, constraint);
+        pnlMain.add(pnlPlanetView, constraint);
 
         constraint.gridx = 2;
         constraint.gridy = 6;
@@ -180,4 +227,26 @@ public class MainWindow extends JFrame {
         pnlMain.add(cbEnableControls, constraint);
     }
 
+    public PlanetView getPlanetView() {
+        return planetView;
+    }
+
+    public void setPlanetView(PlanetView planetView) {
+        if(this.planetView != null) return;
+        pnlMain.remove(pnlPlanetView);
+        this.planetView = planetView;
+        pnlPlanetView = planetView.getPlanetView();
+        constraint.gridx = 2;
+        constraint.gridy = 1;
+        constraint.gridwidth = 3;
+        constraint.gridheight = 5;
+        constraint.weightx = constraint.weighty = 65;
+        constraint.insets = new Insets(50, 0, 0, 50);
+        pnlMain.add(pnlPlanetView, constraint);
+        pnlMain.validate();
+    }
+
+    private void setSelectedRobot() {
+        lRobotList.setSelectedIndex(listModel.getSize() + 1);
+    }
 }
