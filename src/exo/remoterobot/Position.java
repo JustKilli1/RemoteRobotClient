@@ -100,7 +100,10 @@ public class Position {
 		}
 		return Optional.empty();
 	}
-	
-	
+
+	@Override
+	public Position clone() {
+		return new Position(x, y, dir);
+	}
 	
 }

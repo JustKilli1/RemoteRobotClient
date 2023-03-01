@@ -13,6 +13,7 @@ import shared.Utils;
 import java.awt.*;
 import java.awt.event.ItemListener;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyListener;
 
 public class MainWindow extends JFrame {
     private Design design;
@@ -58,6 +59,7 @@ public class MainWindow extends JFrame {
     public void addItemChangeListener(ItemListener listener) {
         cbEnableControls.addItemListener(listener);
     }
+    public void addKeyListener(KeyListener listener) { addKeyListener(listener); }
 
     public void changeConsole(RemoteRobot robot) {
         if(robot == null)  robotConsole.setConsole(null);
