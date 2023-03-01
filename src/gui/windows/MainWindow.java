@@ -1,12 +1,10 @@
 package gui.windows;
 
-import exo.planet.Ground;
 import exo.planet.PlanetView;
 import exo.remoterobot.MeasureData;
 import exo.remoterobot.Position;
 import gui.Design;
 import exo.remoterobot.RemoteRobot;
-import exo.remoterobot.RobotConsole;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionListener;
@@ -17,10 +15,7 @@ import shared.Utils;
 import java.awt.*;
 import java.awt.event.ItemListener;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.HashMap;
-import java.util.Map;
 
 public class MainWindow extends JFrame {
     private static MainWindow instance = new MainWindow();
@@ -83,26 +78,6 @@ public class MainWindow extends JFrame {
 
     public void addItemChangeListener(ItemListener listener) {
         cbEnableControls.addItemListener(listener);
-    }
-    public void changeRobotPos(RemoteRobot robot, Position pos) {
-        planetView.changeRobotPos(robot, pos);
-    }
-
-    public PlanetView changePlanetView(PlanetView planetView) {
-        pnlMain.remove(pnlPlanetView);
-        PlanetView oldPlanetView = null;
-        if(this.planetView != null) oldPlanetView = this.planetView.clone();
-        this.planetView = planetView;
-        pnlPlanetView = planetView.getPlanetView();
-        constraint.gridx = 2;
-        constraint.gridy = 1;
-        constraint.gridwidth = 3;
-        constraint.gridheight = 5;
-        constraint.weightx = constraint.weighty = 65;
-        constraint.insets = new Insets(50, 0, 0, 50);
-        pnlMain.add(pnlPlanetView, constraint);
-        pnlMain.validate();
-        return oldPlanetView;
     }
 
     public void addGround(Position pos, MeasureData measureData) {
@@ -184,8 +159,6 @@ public class MainWindow extends JFrame {
     }
 
     private void buildRobotView() {
-        //robotConsole = new RobotConsole();
-        //spRobotConsoleView = robotConsole.buildConsoleView();
         pnlPlanetView = Utils.createFillerPanel(design, true);
 
         cbEnableControls = new JCheckBox("Enable Controls");
@@ -247,6 +220,6 @@ public class MainWindow extends JFrame {
     }
 
     private void setSelectedRobot() {
-        lRobotList.setSelectedIndex(listModel.getSize() + 1);
+        lRobotList.setSelectedIndex(listModel.getSize() - 1);
     }
 }

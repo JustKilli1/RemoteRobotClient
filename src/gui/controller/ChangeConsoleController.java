@@ -17,6 +17,7 @@ import javax.swing.event.ListSelectionListener;
  * Required Models:<br>
  * - {@link ClientModel} --> Handles the Console change call
  * */
+@Deprecated
 public class ChangeConsoleController {
 
     private MainWindow view;
@@ -36,8 +37,8 @@ public class ChangeConsoleController {
 
         @Override
         public void valueChanged(ListSelectionEvent e) {
-            RemoteRobot robot = view.getSelectedRobot();
-            OutputManager.setActiveRobot(robot);
+/*            RemoteRobot robot = view.getSelectedRobot();
+            OutputManager.setActiveRobot(robot);*/
         }
     }
 

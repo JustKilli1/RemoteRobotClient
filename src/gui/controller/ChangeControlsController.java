@@ -75,7 +75,7 @@ public class ChangeControlsController {
             } else if(e.getKeyCode()== KeyEvent.VK_E) {
                 if(enableControls) robot.sendCommand(ExoPlanetCommands.rotate(Rotation.RIGHT));
             } else if(e.getKeyCode()== KeyEvent.VK_D) {
-                if(enableControls) robot.sendCommand(ExoPlanetCommands.moveScan());
+                if(enableControls) robot.sendCommand(ExoPlanetCommands.move());
             } else if(e.getKeyCode()== KeyEvent.VK_S) {
                     if(enableControls) robot.sendCommand(ExoPlanetCommands.scan());
             } else if(e.getKeyCode() == KeyEvent.VK_F) {
