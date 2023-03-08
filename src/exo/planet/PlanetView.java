@@ -20,13 +20,13 @@ public class PlanetView {
     private JPanel planetView;
     private Map<Integer, Position> robotIconPos;
 
-    public PlanetView(Size planetSize, Design design, Position pos, RemoteRobot robot) {
+    public PlanetView(Size planetSize, Design design) {
         this.planetSize = planetSize;
         this.design = design;
         robotIconPos = new HashMap<>();
         robotIcon = new JLabel();
         robotIcon.setIcon(new ImageIcon("RobotIcon_SOUTH.png"));
-        build(robot, pos);
+        build();
     }
 
     private PlanetView(Size planetSize, Design design, JPanel[][] planetFields, JLabel robotIcon, JPanel planetView) {
@@ -37,7 +37,7 @@ public class PlanetView {
         this.planetView = planetView;
     }
 
-    public void build(RemoteRobot robot, Position pos) {
+    public void build() {
         planetView = new JPanel(new GridLayout(planetSize.getHeight(), planetSize.getWidth()));
         planetView.setBackground(design.getComponentColor());
         planetView.setBorder(design.getBorder());
@@ -46,7 +46,6 @@ public class PlanetView {
         for(int i = 0; i < planetSize.getHeight(); i++) {
             for(int z = 0; z < planetSize.getWidth(); z++) {
                 JPanel fieldPanel = new JPanel();
-                fieldPanel.setBackground(Ground.NICHTS.getColor());
                 fieldPanel.setBackground(design.getComponentColor());
                 planetFields[i][z] = fieldPanel;
                 planetView.add(fieldPanel);
@@ -58,13 +57,8 @@ public class PlanetView {
         if(!pos.inBounds()) return;
         if(pos.getY() >= planetFields.length || pos.getX() >= planetFields[pos.getY()].length) return;
         planetFields[pos.getY()][pos.getX()].setBackground(measureData.getGround().getColor());
-/*        JLabel temp = new JLabel();
-        temp.setText(Math.ceil(measureData.getTemperature()) + "");
-        temp.setForeground(Color.WHITE);
-        temp.setFont(new Font("Arial", 1, 12));
-        planetFields[pos.getY()][pos.getX()].add(temp);
-        planetFields[pos.getY()][pos.getX()].revalidate();*/
-/*        knownFields[pos.getY()][pos.getX()] = planetFields[pos.getY()][pos.getX()];*/
+        planetFields[pos.getY()][pos.getX()].revalidate();
+        addScannedField(pos);
     }
 
     public void addScannedField(Position pos) {
@@ -72,7 +66,7 @@ public class PlanetView {
     }
 
     public boolean alreadyMeasured(Position pos) {
-        if(!pos.inBounds())return true;
+        if(!pos.inBounds() || knownFields.length <= pos.getY()) return true;
         if(knownFields[pos.getY()][pos.getX()] != null) return true;
         return false;
     }
@@ -102,7 +96,6 @@ public class PlanetView {
         icon.setBackground(Color.WHITE);
         icon.setBorder(design.getBorder());
         icon.setOpaque(true);
-
         return icon;
     }
 
@@ -118,8 +111,9 @@ public class PlanetView {
     public void removeRobot(RemoteRobot robot) {
         if(!robotIconPos.containsKey(robot.getId())) return;
         Position pos = robotIconPos.get(robot.getId());
+        System.out.println(pos);
         planetFields[pos.getY()][pos.getX()].removeAll();
-/*        planetFields[pos.getY()][pos.getX()].revalidate();*/
+        planetFields[pos.getY()][pos.getX()].revalidate();
         planetFields[pos.getY()][pos.getX()].repaint();
         robotIconPos.remove(robot.getId());
     }

@@ -45,9 +45,7 @@ public class ChangeControlsController {
                 enableControls = true;
             } else {
                 enableControls = false;
-                RemoteRobot robot = MainWindow.getInstance().getSelectedRobot();
-                if(robot == null) return;
-                robot.sendCommand(ExoPlanetCommands.scan());
+                ClientModel.sendCommandToAllRobots(ExoPlanetCommands.scan());
             }
 
         }

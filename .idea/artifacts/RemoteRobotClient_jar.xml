@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="RemoteRobotClient:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/RemoteRobotClient_jar</output-path>
+    <root id="archive" name="RemoteRobotClient.jar">
+      <element id="module-output" name="RemoteRobotClient" />
+    </root>
+  </artifact>
+</component>

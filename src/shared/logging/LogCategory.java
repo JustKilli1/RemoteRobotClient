@@ -2,10 +2,8 @@ package shared.logging;
 
 public enum LogCategory {
 
-    SYSTEM("System"),
-    WORLD("World"),
-    PLAYER("Player"),
-    OTHER("Other")
+    SYSTEM("logs/System"),
+    ROBOT("logs/Robot")
     ;
 
     private String folderName;

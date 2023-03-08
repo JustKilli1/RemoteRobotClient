@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/Bodenstation.iml" filepath="$PROJECT_DIR$/Bodenstation.iml" />
+      <module fileurl="file://$PROJECT_DIR$/RemoteRobotClient.iml" filepath="$PROJECT_DIR$/RemoteRobotClient.iml" />
     </modules>
   </component>
 </project>

@@ -1,5 +1,6 @@
 package gui.controller;
 
+import base.Main;
 import gui.ClientModel;
 import gui.windows.MainWindow;
 import exo.remoterobot.RemoteRobot;
@@ -40,6 +41,10 @@ public class AddRemoveRobotController {
             String robotName = JOptionPane.showInputDialog(view, "Bitte Robotername eingeben", "Robotername");
             if(robotName == null || robotName.length() == 0) return;
             RemoteRobot robot = model.createNewRobot(robotName);
+            if(robot == null) {
+                JOptionPane.showMessageDialog(null, "Es können nicht mehr als " + Main.getMaxRobots() + " Roboter gleichzeitig den Planeten erkunden.");
+                return;
+            }
             view.addRobot(robot);
         }
     }

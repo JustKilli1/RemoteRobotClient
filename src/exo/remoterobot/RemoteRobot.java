@@ -1,10 +1,12 @@
 package exo.remoterobot;
 
 
+import base.Main;
 import exo.planet.ExoPlanetCommands;
 import exo.planet.Ground;
 import exo.planet.PlanetView;
 import exo.planet.Size;
+import gui.ClientModel;
 import gui.Design;
 import gui.OutputManager;
 import gui.controller.ChangeControlsController;
@@ -15,11 +17,11 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class RemoteRobot implements Runnable{
 
-    private int id;
-    private double temperature;
+    private int id, energy;
     private String name;
     private Design design;
     private boolean isActive;
@@ -27,18 +29,19 @@ public class RemoteRobot implements Runnable{
     private BufferedReader input;
     private PrintWriter output, outputGround;
     private Position robotPos;
-    private RobotConsole console;
     private MeasureData lastData;
+    private Size planetSize;
+    private int turnsWithoutCharge, unsuccessfulMoves;
+    private boolean orbited;
+    private boolean landed = orbited = false;
 
 
     public RemoteRobot(int id, String name, Design design) {
     	this.id = id;
         this.name = name;
         this.design = design;
-        this.console = new RobotConsole();
         isActive = true;
-        console.print("Robot \"" + name + "\" created");
-        temperature = 12;
+        energy = 100;
     }
 
 
@@ -47,7 +50,7 @@ public class RemoteRobot implements Runnable{
     }
 
     public boolean isAtPos(Position pos) {
-        return true;
+        return robotPos.equals(pos);
     }
 
     public void setActive(boolean isActive) {
@@ -61,27 +64,35 @@ public class RemoteRobot implements Runnable{
     @Override
     public void run() {
         try {
-            serverCon = new Socket("localhost", 8150);
-            groundCon = new Socket("localhost", 7832);
+            int port = Main.getPort() > 0 ? Main.getPort() : 8150;
+            int portGround = Main.getPortGround() > 0 ? Main.getPortGround() : 7832;
+            System.out.println(Main.getPort());
+            System.out.println(Main.getPortGround());
+            groundCon = new Socket("0.0.0.0", portGround);
+            serverCon = new Socket("0.0.0.0", port);
             output = new PrintWriter(serverCon.getOutputStream(), true);
             outputGround = new PrintWriter(groundCon.getOutputStream(), true);
             input = new BufferedReader(new InputStreamReader(serverCon.getInputStream()));
 
-            sendCommand(ExoPlanetCommands.orbit(this));
-            sendCommand(ExoPlanetCommands.land(new Position(7, 5, Direction.EAST)));
-
-
             while(isActive) {
+                if(!orbited) sendCommand(ExoPlanetCommands.orbit(this));
                 String response = input.readLine();
                 System.out.println(response);
                 if(ChangeControlsController.isEnableControls()) {
                     reactToResponse(response);
-                }/* else {
-                    sendCommand(getNextCommand(response));
-                }*/
+                } else {
+                    String nextCommand = reactToResponse(response);
+                    if(nextCommand != null) sendCommand(nextCommand);
+                    turnsWithoutCharge++;
+                }
+                if(!landed) {
+                    ThreadLocalRandom random = ThreadLocalRandom.current();
+                    robotPos = new Position(random.nextInt(0, planetSize.getWidth()), random.nextInt(0, planetSize.getHeight()));
+                    sendCommand(ExoPlanetCommands.land(robotPos));
+                }
             }
             closeConnection();
-            System.out.println("Connection closed");
+            System.out.println(name + " Connection closed");
         } catch (Exception ex) {
             System.out.println("Es konnte keine Verbindung zum Server hergestellt werden. ._.");
             ex.printStackTrace();
@@ -89,109 +100,69 @@ public class RemoteRobot implements Runnable{
         }
     }
 
-    public void reactToResponse(String lastResponse) {
-        if(lastResponse == null) return;
+    public String reactToResponse(String lastResponse) {
+        if(lastResponse == null) return null;
         String[] responseSplit = lastResponse.split(":");
+        Rotation randomRotation = ThreadLocalRandom.current().nextInt(0, 10) <= 2 ? Rotation.RIGHT : Rotation.LEFT;
         switch(responseSplit[0]) {
             case "init":
-                Size size = Size.parse(responseSplit[1]).get();
-                robotPos = new Position(10, 0, Direction.EAST);
-                OutputManager.setPlanetView(new PlanetView(size, design, robotPos, this));
-                break;
+                planetSize = Size.parse(responseSplit[1]).get();
+                OutputManager.setPlanetView(new PlanetView(planetSize, design));
+                orbited = true;
+                return null;
             case "landed":
                 lastData = MeasureData.parse(responseSplit[1]).get();
+                if(!OutputManager.alreadyMeasured(robotPos)) sendToGround(robotPos, lastData);
                 OutputManager.addGround(robotPos, lastData);
                 OutputManager.changeRobotPos(this, robotPos);
-                if(!OutputManager.alreadyMeasured(robotPos)) sendToGround(robotPos, lastData);
-                break;
+                landed = true;
+                return ExoPlanetCommands.scan();
             case "scaned":
+                if(turnsWithoutCharge >= 16 && (lastData.getGround().equals(Ground.SAND) || lastData.getGround().equals(Ground.PFLANZEN))) {
+                    turnsWithoutCharge = 0;
+                    return ExoPlanetCommands.charge(10);
+                }
                 lastData = MeasureData.parse(responseSplit[1]).get();
-                OutputManager.addGround(Utils.getScanPos(robotPos.clone()), lastData);
+                if(lastData.getGround().equals(Ground.NICHTS))return ExoPlanetCommands.rotate(randomRotation);
                 if(!OutputManager.alreadyMeasured(Utils.getScanPos(robotPos.clone()))) sendToGround(Utils.getScanPos(robotPos.clone()), lastData);
-                break;
+                OutputManager.addGround(Utils.getScanPos(robotPos.clone()), lastData);
+                if(lastData.getTemperature() > 100) return ExoPlanetCommands.rotate(randomRotation);
+                if(lastData.getTemperature() < -30) return ExoPlanetCommands.rotate(randomRotation);
+                if(lastData.getGround().equals(Ground.LAVA)) return ExoPlanetCommands.rotate(randomRotation);
+                if(ClientModel.isRobotAtPos(Utils.getScanPos(robotPos.clone()))) return ExoPlanetCommands.rotate(randomRotation);
+                return ExoPlanetCommands.move();
             case "moved":
-                robotPos = Position.parse(responseSplit[1]).get();
+                Position newPos = Position.parse(responseSplit[1]).get();
+                if(robotPos.equals(newPos)) unsuccessfulMoves++;
+                if(unsuccessfulMoves > 2) {
+                    unsuccessfulMoves = 0;
+                    return ExoPlanetCommands.rotate(randomRotation);
+                }
+                robotPos = newPos;
                 OutputManager.changeRobotPos(this, robotPos);
-                break;
+                return ExoPlanetCommands.scan();
             case "mvscaned":
                 lastData = MeasureData.parse(responseSplit[1]).get();
                 robotPos = Position.parse(responseSplit[2]).get();
+                if(!OutputManager.alreadyMeasured(Utils.getScanPos(robotPos.clone()))) sendToGround(Utils.getScanPos(robotPos.clone()), lastData);
                 OutputManager.addGround(Utils.getScanPos(robotPos.clone()), lastData);
                 OutputManager.changeRobotPos(this, robotPos);
-                if(!OutputManager.alreadyMeasured(Utils.getScanPos(robotPos.clone()))) sendToGround(Utils.getScanPos(robotPos.clone()), lastData);
                 break;
             case "rotated":
                 robotPos.setDir(Direction.valueOf(responseSplit[1]));
                 OutputManager.changeRobotPos(this, robotPos);
-                break;
+                return ExoPlanetCommands.scan();
             case "crashed", "error":
                 System.out.println(lastResponse);
                 JOptionPane.showMessageDialog(null, name + " ist gecrasht");
-                exit();
+                ClientModel.deleteRemoteRobot(this);
                 break;
             case "charged":
                 String split[] = responseSplit[1].split("\\|");
-                JOptionPane.showMessageDialog(null, "Aufladen beendet. Akkustand: " + split[1]);
-                break;
+                if(ChangeControlsController.isEnableControls()) JOptionPane.showMessageDialog(null, "Aufladen beendet. Akkustand: " + split[1], name, JOptionPane.INFORMATION_MESSAGE);
+                return ExoPlanetCommands.scan();
         }
-    }
-
-    private String getNextCommand(String lastResponse) {
-        String[] responseSplit = lastResponse.split(":");
-
-        switch(responseSplit[0]) {
-            case "init":
-                Size size = Size.parse(responseSplit[1]).get();
-                robotPos = new Position(0, 0, Direction.EAST);
-                OutputManager.setPlanetView(new PlanetView(size, design, robotPos, this));
-                return ExoPlanetCommands.land(robotPos);
-            case "landed":
-                lastData = MeasureData.parse(responseSplit[1]).get();
-                OutputManager.addGround(robotPos, lastData);
-                return ExoPlanetCommands.scan();
-            case "scaned":
-                lastData = MeasureData.parse(responseSplit[1]).get();
-                if(lastData.getGround().equals(Ground.NICHTS))return ExoPlanetCommands.rotate(Rotation.RIGHT);
-                Position fieldPos = robotPos;
-                int setX = 0;
-                int setY = 0;
-                System.out.println(fieldPos);
-                if(fieldPos.getDir().equals(Direction.EAST)) setX = 1;
-                if(fieldPos.getDir().equals(Direction.WEST)) setX = -1;
-                if(fieldPos.getDir().equals(Direction.NORTH)) setY = -1;
-                if(fieldPos.getDir().equals(Direction.SOUTH)) setY = 1;
-                fieldPos.setX(fieldPos.getX() + setX);
-                fieldPos.setY(fieldPos.getY() + setY);
-                OutputManager.addGround(fieldPos, lastData);
-                if(lastData.getTemperature() > 100) return ExoPlanetCommands.rotate(Rotation.RIGHT);
-                if(lastData.getTemperature() < -20) return ExoPlanetCommands.rotate(Rotation.RIGHT);
-                if(lastData.getGround().equals(Ground.LAVA)){
-                    return ExoPlanetCommands.rotate(Rotation.RIGHT);
-                }
-                return ExoPlanetCommands.move();
-            case "moved":
-                robotPos = Position.parse(responseSplit[1]).get();
-                OutputManager.changeRobotPos(this, robotPos);
-                return ExoPlanetCommands.scan();
-            case "mvscaned":
-                lastData = MeasureData.parse(responseSplit[1]).get();
-                robotPos = Position.parse(responseSplit[2]).get();
-                OutputManager.addGround(robotPos, lastData);
-                OutputManager.changeRobotPos(this, robotPos);
-                if(lastData.getGround().equals(Ground.LAVA)) return ExoPlanetCommands.rotate(Rotation.RIGHT);
-                return ExoPlanetCommands.moveScan();
-            case "rotated":
-                robotPos.setDir(Direction.valueOf(responseSplit[1]));
-                OutputManager.changeRobotPos(this, robotPos);
-                return ExoPlanetCommands.scan();
-            case "crashed":
-                System.out.println(lastResponse);
-                return ExoPlanetCommands.exit();
-            case "error":
-                System.out.println(lastResponse);
-                break;
-        }
-        return ExoPlanetCommands.exit();
+        return null;
     }
 
     public void sendCommand(String cmd) {
@@ -199,8 +170,9 @@ public class RemoteRobot implements Runnable{
     }
 
     public void sendToGround(Position pos, MeasureData measureData) {
-        outputGround.println(measureData);
+        outputGround.println(id + ":" + measureData);
         OutputManager.addScannedField(pos);
+        System.out.println(name + ": Messdaten an Ground geschickt");
     }
 
     public int getId() {
@@ -210,12 +182,6 @@ public class RemoteRobot implements Runnable{
     public String getName() {
         return name;
     }
-
-    public double getTemperature() {
-        return temperature;
-    }
-
-    public RobotConsole getRobotConsole() { return console; }
 
     public void closeConnection() {
         try {
@@ -237,5 +203,9 @@ public class RemoteRobot implements Runnable{
         if(id != robot.getId()) return false;
         if(name.equals(robot.getName())) return false;
         return true;
+    }
+
+    public int getEnergy() {
+        return energy;
     }
 }

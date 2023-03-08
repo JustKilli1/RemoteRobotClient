@@ -1,5 +1,6 @@
 package gui;
 
+import base.Main;
 import exo.remoterobot.Position;
 import exo.remoterobot.RemoteRobot;
 
@@ -22,6 +23,7 @@ public class ClientModel {
     }
 
     public RemoteRobot createNewRobot(String name) {
+        if(robots.size() == Main.getMaxRobots()) return null;
         robotIdCounter++;
         RemoteRobot robot = new RemoteRobot(robotIdCounter, name, design);
         robots.add(robot);
@@ -29,7 +31,7 @@ public class ClientModel {
         return robot;
     }
 
-    public boolean deleteRemoteRobot(RemoteRobot robot) {
+    public static boolean deleteRemoteRobot(RemoteRobot robot) {
         robot.exit();
         robots.remove(robot);
         return true;
@@ -39,17 +41,8 @@ public class ClientModel {
         return robots.stream().anyMatch(robot -> robot.isAtPos(pos));
     }
 
-    public void sendCommand(RemoteRobot robot, String cmd) {
+    public static void sendCommandToAllRobots(String cmd) {
+        robots.forEach(robot -> robot.sendCommand(cmd));
     }
 
-    public void changeControls(RemoteRobot robot) {
-    }
-
-    public boolean isEnableControls() {
-        return enableControls;
-    }
-
-    public void setEnableControls(boolean enableControls) {
-        this.enableControls = enableControls;
-    }
 }
